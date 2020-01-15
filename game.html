@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>センサからの信号受信</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.min.js"></script>
+
+ <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+      
+      
+    
+      
+  </head>
+
+
+
+  <body>
+  <header><center><h1>癒しの空間 はとver.</h1>  </center></header>
+  <div>
+    <div>あなたのID: <span id="myid"></span></div>
+    <div>ルームID: <span id="room"></span></div>
+    <div>受信した情報はコンソールログで確認してください</div>
+    <button id="speak">話す</button>
+    
+   <audio src="music.wav" controls>
+  <p><a src="music.wav">音声ながす</a></p>
+      </audio>
+      </div>
+       
+    <script>
+        
+    var PassSec;
+        
+        
+    let room = "s1317224";
+    let socket = io.connect('https://qa.fujimura.com');    
+    let myid;
+    let speedX = 0;
+    let speedY = 0;
+    let hato;
+    let hato2;
+    let hato3;
+    let kusa2;
+    
+   
+    document.querySelector("#room").innerHTML = room;
+    socket.on('mylogin', function(data) {
+      myid = data;
+      socket.emit('join', room); // 受信room IDを指定
+      document.querySelector("#myid").innerHTML = myid;
+      console.log("あなたのID: ", myid);
+    });
+           
+    socket.on('sensor',function(data) {
+        console.log(parseInt(data.g,10));
+        speedX = 0.05*parseInt(data.g);
+        speedY = 0.05*parseInt(data.b);
+    });
+    let x=0;
+    let y=0;
+    function preload(){
+        hato = loadImage("hato.png")
+        hato2 = loadImage("hato2.png")
+        hato3 = loadImage("hato3.png")
+        kusa2 = loadImage("kusa2.png")
+       
+        
+    }
+    function setup() {
+       createCanvas(640,480);
+        background(163,229,149);
+        
+        x = width/2;
+        y = height/2;
+        
+    }
+
+
+function draw() {
+  background(163,229,149);
+  x = x + speedX;
+  y = y + speedY;
+  if (x>width-50) x=width-50;
+  if(x<0) x=0;
+  if(y>height-50) y=height-50;
+  if(y<0) y=0;
+ 
+  image(kusa2,1,1);
+    
+ // if (y<=50 && y>=100) {
+  //    image(hato2,x,y,200,200);
+ // }
+ if(y>=100){
+       image(hato2,x,y,200,200);
+        }else if(x=>100){
+             image(hato3,x,y,200,200);
+            
+        }else if(y=>100){
+  image(karaage,x,y,200,200);
+  }
+}
+
+ 
+  // 発話機能をインスタンス化
+  let msg = new SpeechSynthesisUtterance();
+  let voices = window.speechSynthesis.getVoices();
+
+  function speak(text) {
+    // 以下オプション設定
+    msg.voice = voices[7]; // 7:Google 日本人 ja-JP ※他は英語のみ
+    msg.volume = 1.0; // 音量 min 0 ~ max 1
+    msg.rate = 1.0; // 速度 min 0 ~ max 10
+    msg.pitch = 1.0; // 音程 min 0 ~ max 2
+
+    msg.text = text; // 喋る内容
+    msg.lang = 'ja-JP'; // en-US or ja-JP
+    // msg.lang = 'en-US'; // en-US or ja-JP
+
+    // 発話実行
+    speechSynthesis.speak(msg);
+  }
+
+  
+  // 終了時の処理
+  msg.onend = function (event) {
+    console.log("End: ",text);
+  }
+
+  
+let text = "ぽっぽおー";
+let button = document.querySelector("#speak");
+  button.onclick = function () {
+    speak(text);
+  }
+  
+ 
+</script>
+
+<style>
+    
+ header {
+    background-color: #AD1874;
+    color: #fff;
+    text-align: center;
+    font-family: '游明朝','Yu Gothic';
+            
+}
+  
+ #text {
+  margin:10px auto;
+  width: 500px;
+}
+
+
+</style>
+
+</body>
+
+</html>
+
